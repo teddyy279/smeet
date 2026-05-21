@@ -16,7 +16,7 @@ import java.util.UUID;
 @Builder
 
 @Table(name = "call_sessions")
-public class Callsession {
+public class CallSession {
     public enum Status { ONGOING, ENDED, MISSED }
 
     @Id

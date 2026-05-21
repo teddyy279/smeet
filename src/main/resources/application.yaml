@@ -29,6 +29,9 @@ spring:
     time-zone: Asia/Ho_Chi_Minh
 
   data:
+    mongodb:
+      uri: ${MONGO_URI}
+
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
@@ -80,4 +83,5 @@ spring:
 
 jwt:
   signerKey: ${JWT_SECRET}
-
+  access-token-expiry: 3600
+  refresh-token-expiry: 604800
