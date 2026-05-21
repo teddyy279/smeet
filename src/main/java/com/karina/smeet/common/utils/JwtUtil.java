@@ -58,9 +58,7 @@ public class JwtUtil {
         return UUID.fromString(getClaims(token).getSubject());
     }
 
-    public String extractEmail(String token) {
-        return getClaims(token).get("email", String.class);
-    }
+    public String extractEmail(String token) { return getClaims(token).get("email", String.class); }
 
     public long getAccessTokenExpiry() {
         return accessTokenExpiry;
