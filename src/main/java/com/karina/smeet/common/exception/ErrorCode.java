@@ -17,6 +17,11 @@ public enum ErrorCode {
     UNAUTHENTICATED(1006, "Unauthenticated", HttpStatus.UNAUTHORIZED),
     REFRESH_TOKEN_EXPIRED(1007, "Refresh Token has expired", HttpStatus.UNAUTHORIZED),
     INVALID_CREDENTIALS(1008, "Invalid email or password", HttpStatus.UNAUTHORIZED),
+    USER_NOT_EXISTED(1009, "USER NOT EXISTED", HttpStatus.NOT_FOUND),
+    OTP_TOO_MANY_REQUESTS(1010, "Please wait 60 seconds before requesting a new OTP", HttpStatus.TOO_MANY_REQUESTS),
+    EXPIRED_OTP(1017, "OTP has expired, please request a new one", HttpStatus.BAD_REQUEST),
+    INVALID_OTP(1018, "Invalid OTP code", HttpStatus.BAD_REQUEST),
+    AUTH_PROVIDER_NOT_FOUND(1014, "Password login method for this account not found", HttpStatus.NOT_FOUND);
     ;
     private int code;
     private String message;
