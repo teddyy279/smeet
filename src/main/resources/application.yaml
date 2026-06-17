@@ -27,11 +27,13 @@ spring:
           org.hibernate.dialect.PostgreSQLDialect
   jackson:
     time-zone: Asia/Ho_Chi_Minh
+    # serialization:
+    #   write-dates-as-timestamps: false
+
+  mongodb:
+    uri: ${MONGO_URI}
 
   data:
-    mongodb:
-      uri: ${MONGO_URI}
-
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
@@ -80,6 +82,7 @@ spring:
             scope:
               - email
               - profile
+
 
 jwt:
   signerKey: ${JWT_SECRET}
