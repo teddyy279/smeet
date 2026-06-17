@@ -33,12 +33,24 @@ import java.util.List;
 
 public class SecurityConfig {
     JwtAuthFilter jwtAuthFilter;
-    ObjectMapper objectMapper;
+    ObjectMapper objectMapper = new ObjectMapper();
 
-    static String[] PUBLIC_ENDPOINTS = {"/auth/register", "/auth/login", "/auth/refresh"};
+    static String[] PUBLIC_ENDPOINTS = {
+            "/auth/register",
+            "/auth/login",
+            "/auth/refresh",
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/swagger-ui.html",
+            "/auth/send-otp",
+            "/auth/reset-password",
+            "/auth/outbound/authentication"
+    };
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource)
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            CorsConfigurationSource corsConfigurationSource)
             throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
@@ -55,7 +67,7 @@ public class SecurityConfig {
                             response.setCharacterEncoding("UTF-8");
                             objectMapper.writeValue(
                                     response.getWriter(),
-                                    ApiResponse.builder().message("Chưa đăng nhập hoặc token hết hạn")
+                                    ApiResponse.builder().message("Chưa đăng nhập hoặc token hết hạn").build()
                             );
                         })
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
@@ -64,7 +76,7 @@ public class SecurityConfig {
                             response.setCharacterEncoding("UTF-8");
                             objectMapper.writeValue(
                                     response.getWriter(),
-                                    ApiResponse.builder().message("Không có quyền thực hiện thao tác này")
+                                    ApiResponse.builder().message("Không có quyền thực hiện thao tác này").build()
                             );
                         })
                 )
@@ -96,10 +108,5 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
-    }
-
-    @Bean
-    public ObjectMapper objectMapper() {
-        return new ObjectMapper();
     }
 }

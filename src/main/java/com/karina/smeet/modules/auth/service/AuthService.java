@@ -19,4 +19,6 @@ public interface AuthService {
     void logout(HttpServletRequest request, HttpServletResponse response);
 
     void logoutAll(UUID userId, HttpServletResponse response);
+
+    AuthResponse outboundAuthenticate(String code, HttpServletResponse response);
 }

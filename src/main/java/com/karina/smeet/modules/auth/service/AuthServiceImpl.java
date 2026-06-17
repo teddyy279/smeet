@@ -9,12 +9,15 @@ import com.karina.smeet.entity.postgre.User;
 import com.karina.smeet.entity.postgre.UserAuthProvider;
 import com.karina.smeet.enums.Provider;
 import com.karina.smeet.modules.auth.dto.request.LoginRequest;
+import com.karina.smeet.modules.auth.dto.request.OutboundTokenRequest;
 import com.karina.smeet.modules.auth.dto.request.RegisterRequest;
 import com.karina.smeet.modules.auth.dto.response.AuthResponse;
 import com.karina.smeet.modules.auth.dto.response.RefreshTokenResponse;
 import com.karina.smeet.modules.auth.repository.RefreshTokenRepository;
 import com.karina.smeet.modules.auth.repository.UserAuthProviderRepository;
 import com.karina.smeet.modules.user.repository.UserRepository;
+import lombok.experimental.NonFinal;
+import org.springframework.beans.factory.annotation.Value;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
@@ -41,6 +44,19 @@ public class AuthServiceImpl implements AuthService{
     JwtUtil jwtUtil;
     PasswordEncoder passwordEncoder;
     RefreshTokenRepository refreshTokenRepository;
+    GoogleOutboundClient googleOutboundClient;
+
+    @NonFinal
+    @Value("${spring.security.oauth2.client.registration.google.client-id}")
+    String clientId;
+
+    @NonFinal
+    @Value("${spring.security.oauth2.client.registration.google.client-secret}")
+    String clientSecret;
+
+    @NonFinal
+    @Value("${spring.security.oauth2.client.registration.google.redirect-uri}")
+    String redirectUri;
 
     @Override
     @Transactional
@@ -118,6 +134,52 @@ public class AuthServiceImpl implements AuthService{
     @Override
     public void logoutAll(UUID userId, HttpServletResponse response) {
         tokenService.deleteAllRefreshTokens(userId, response);
+    }
+
+    @Override
+    @Transactional
+    public AuthResponse outboundAuthenticate(String code, HttpServletResponse response) {
+        var tokenResponse = googleOutboundClient.exchangeToken(new OutboundTokenRequest(
+                code,
+                clientId,
+                clientSecret,
+                redirectUri,
+                "authorization_code"
+        ));
+
+        var userInfo = googleOutboundClient.getUserInfo(tokenResponse.accessToken());
+
+        User user = userRepository.findByEmail(userInfo.email())
+                .orElseGet(() -> {
+                    String baseUsername = userInfo.email().split("@")[0];
+                    String username = baseUsername;
+                    int count = 1;
+                    while (userRepository.existsByUsername(username)) {
+                        username = baseUsername + count++;
+                    }
+
+                    User newUser = User.builder()
+                            .username(username)
+                            .email(userInfo.email())
+                            .displayName(userInfo.name() != null ? userInfo.name() : username)
+                            .avatarUrl(userInfo.picture())
+                            .build();
+                    return userRepository.save(newUser);
+                });
+
+        userAuthProviderRepository.findByUserAndProvider(user, Provider.GOOGLE)
+                .orElseGet(() -> {
+                    UserAuthProvider newProvider = UserAuthProvider.builder()
+                            .user(user)
+                            .provider(Provider.GOOGLE)
+                            .providerId(userInfo.id())
+                            .build();
+                    return userAuthProviderRepository.save(newProvider);
+                });
+
+        tokenService.createRefreshToken(user, response);
+
+        return buildAuthResponse(user);
     }
 
     private AuthResponse buildAuthResponse(User user) {
