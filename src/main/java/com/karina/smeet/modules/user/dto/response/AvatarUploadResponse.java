@@ -1,4 +1,5 @@
 package com.karina.smeet.modules.user.dto.response;
 
-public record AvatarUploadResponse() {
-}
+public record AvatarUploadResponse(
+   String avatarUrl
+) {}

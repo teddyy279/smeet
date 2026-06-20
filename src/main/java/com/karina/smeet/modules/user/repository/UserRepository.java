@@ -2,8 +2,11 @@ package com.karina.smeet.modules.user.repository;
 
 import com.karina.smeet.entity.postgre.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -17,4 +20,23 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     boolean existsByEmail(String email);
 
     boolean existsByUsername(String username);
+
+    @Query("""
+            SELECT u FROM User u WHERE u.id IN (
+                SELECT f.addressee.id FROM Friendship f
+                WHERE f.requester.id = :currentUserId AND f.status = 'ACCEPTED'
+                UNION
+                SELECT f.requester.id FROM Friendship f
+                WHERE f.addressee.id = :currentUserId AND f.status = 'ACCEPTED'            
+            )
+            AND (
+                LOWER(u.username) LIKE LOWER(CONCAT('%', :query, '%')) 
+                OR LOWER(u.displayName) LIKE LOWER(CONCAT('%', :query, '%'))           
+            )    
+            """)
+    List<User> searchFriends(
+            @Param("query") String query,
+            @Param("currentUserId") UUID currentUserId
+    );/* search friend -> khi là bạn bè -> (ACCEPTED) -> với 1 user xét cả trường hợp mình là người request và nguời
+     được request kết bạn*/
 }

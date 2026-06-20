@@ -15,7 +15,11 @@ import java.util.UUID;
         uniqueConstraints = @UniqueConstraint(
                 name = "uq_friendship",
                 columnNames = {"requester_id", "addressee_id"}
-        )
+        ),
+        indexes = {
+                @Index(name = "idx_friendship_requester", columnList = "requester_id"),
+                @Index(name = "idx_friendship_addressee", columnList = "addressee_id")
+        }
 )
 @Data
 @Builder
