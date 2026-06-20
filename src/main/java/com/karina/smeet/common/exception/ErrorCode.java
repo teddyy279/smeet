@@ -21,7 +21,16 @@ public enum ErrorCode {
     OTP_TOO_MANY_REQUESTS(1010, "Please wait 60 seconds before requesting a new OTP", HttpStatus.TOO_MANY_REQUESTS),
     EXPIRED_OTP(1017, "OTP has expired, please request a new one", HttpStatus.BAD_REQUEST),
     INVALID_OTP(1018, "Invalid OTP code", HttpStatus.BAD_REQUEST),
-    AUTH_PROVIDER_NOT_FOUND(1014, "Password login method for this account not found", HttpStatus.NOT_FOUND);
+    AUTH_PROVIDER_NOT_FOUND(1014, "Password login method for this account not found", HttpStatus.NOT_FOUND),
+    CURRENT_PASSWORD_BLANK(1015, "Current Password cannot be empty", HttpStatus.BAD_REQUEST),
+    NEW_PASSWORD_BLANK(1016, "New Password cannot be empty", HttpStatus.BAD_REQUEST),
+    PASSWORD_TOO_SHORT(1017, "New Password must be at least 6 characters", HttpStatus.BAD_REQUEST),
+    DISPLAY_NAME_BLANK(1018, "Display name cannot be empty", HttpStatus.BAD_REQUEST),
+    DISPLAY_NAME_TOO_LONG(1019, "Display name must be at least 20 characters", HttpStatus.BAD_REQUEST),
+    FILE_EMPTY(1020, "File is empty", HttpStatus.BAD_REQUEST),
+    FILE_TOO_LARGE(1021, "File size exceeds limit", HttpStatus.BAD_REQUEST),
+    INVALID_FILE_TYPE(1022, "Invalid file type", HttpStatus.BAD_REQUEST),
+    UPLOAD_FAILED(1023, "Failed to upload file", HttpStatus.INTERNAL_SERVER_ERROR),
     ;
     private int code;
     private String message;

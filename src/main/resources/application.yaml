@@ -88,3 +88,8 @@ jwt:
   signerKey: ${JWT_SECRET}
   access-token-expiry: 3600
   refresh-token-expiry: 604800
+
+cloudinary:
+  cloud-name: ${CLOUDINARY_NAME}
+  api-key: ${CLOUDINARY_API_KEY}
+  api-secret: ${CLOUDINARY_API_SECRET}
