@@ -39,4 +39,14 @@ public interface UserRepository extends JpaRepository<User, UUID> {
             @Param("currentUserId") UUID currentUserId
     );/* search friend -> khi là bạn bè -> (ACCEPTED) -> với 1 user xét cả trường hợp mình là người request và nguời
      được request kết bạn*/
+
+    @Query("""
+        SELECT u FROM User u
+        WHERE LOWER(u.username) = LOWER(:username)
+        AND u.id != :currentUserId
+        """)
+    Optional<User> findByUsernameExact(
+            @Param("username") String username,
+            @Param("currentUserId") UUID currentUserId
+    );
 }

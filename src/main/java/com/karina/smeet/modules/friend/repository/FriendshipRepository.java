@@ -9,7 +9,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface FriendshipRepository extends JpaRepository<Friendship, UUID> {
-    @Query()
+    @Query("""
+        SELECT f FROM Friendship f
+        WHERE (
+            (f.requester.id = :userA AND f.addressee.id = :userB)
+            OR
+            (f.requester.id = :userB AND f.addressee.id = :userA)        
+        )
+        """)
     Optional<Friendship> findBetween(
             @Param("userA") UUID userA,
             @Param("userB") UUID userB

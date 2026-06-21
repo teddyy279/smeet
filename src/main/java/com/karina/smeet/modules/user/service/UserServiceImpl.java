@@ -50,6 +50,7 @@ public class UserServiceImpl implements UserService{
     public MyProfileResponse updateProfile(UUID userId, UpdateProfileRequest request) {
         User user = findUserById(userId);
         user.setDisplayName(request.displayName());
+        userRepository.save(user);
         return userMapper.toMyProfile(user);
     }
 
@@ -113,6 +114,15 @@ public class UserServiceImpl implements UserService{
                 .friends(friendItems)
                 .rooms(List.of())
                 .build();
+    }
+
+    @Override
+    public UserProfileResponse findByUsername(String username, UUID currentUserId) {
+        User target = userRepository
+                .findByUsernameExact(username, currentUserId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        return userMapper.toUserProfile(target, currentUserId);
     }
 
     private User findUserById(UUID userId) {

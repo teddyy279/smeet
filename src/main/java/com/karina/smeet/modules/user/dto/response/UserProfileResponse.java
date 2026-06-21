@@ -1,6 +1,10 @@
 package com.karina.smeet.modules.user.dto.response;
 
+import lombok.Builder;
+
 import java.util.UUID;
+
+@Builder
 
 public record UserProfileResponse(
         UUID id,
