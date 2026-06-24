@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -69,6 +70,19 @@ public class RecentSearchService {
         save(currentUserId, item);
     }
 
+    public List<RecentSearchItem> getRecent(UUID currentUserId) {
+        String key = KEY.formatted(currentUserId);
+
+        Set<String> members = redisTemplate.opsForZSet()
+                .reverseRange(key, 0, -1);
+
+        if(members == null) return List.of();
+
+        return members.stream()
+                .map(this::deserialize)
+                .toList();
+    }
+
     public void remove(UUID currentUserId, String targetId) {
         String key = KEY.formatted(currentUserId);
         Set<String> members = redisTemplate.opsForZSet().range(key, 0, -1);
@@ -82,6 +96,10 @@ public class RecentSearchService {
                 .findFirst()
                 .ifPresent(m -> redisTemplate.opsForZSet().remove(key, m));
 
+    }
+
+    public void clear(UUID currentUserId) {
+        redisTemplate.delete(KEY.formatted(currentUserId));
     }
 
     private void save(UUID currentUserId, RecentSearchItem item) {

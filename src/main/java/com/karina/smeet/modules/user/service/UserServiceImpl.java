@@ -18,9 +18,11 @@ import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -38,6 +40,7 @@ public class UserServiceImpl implements UserService{
     UserMapper userMapper;
     UserAuthProviderRepository userAuthProviderRepository;
     OnlineStatusService onlineStatusService;
+    RecentSearchService recentSearchService;
 
     @Override
     public MyProfileResponse getMyProfile(UUID userId) {
@@ -110,6 +113,8 @@ public class UserServiceImpl implements UserService{
                         .build())
                 .toList();
         // rooms
+        //recentSearchService.saveUser(currentUserId,);
+
         return SearchResponse.builder()
                 .friends(friendItems)
                 .rooms(List.of())
@@ -122,7 +127,15 @@ public class UserServiceImpl implements UserService{
                 .findByUsernameExact(username, currentUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
+        recentSearchService.saveUser(currentUserId, target);
         return userMapper.toUserProfile(target, currentUserId);
+    }
+
+    @Override
+    public void selectSearchResult(UUID userId, UUID currentUserId) {
+        User selected = findUserById(currentUserId);
+
+        recentSearchService.saveUser(currentUserId, selected);
     }
 
     private User findUserById(UUID userId) {
