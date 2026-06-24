@@ -16,6 +16,7 @@ import com.karina.smeet.modules.auth.dto.response.RefreshTokenResponse;
 import com.karina.smeet.modules.auth.repository.RefreshTokenRepository;
 import com.karina.smeet.modules.auth.repository.UserAuthProviderRepository;
 import com.karina.smeet.modules.user.repository.UserRepository;
+import com.karina.smeet.modules.user.service.OnlineStatusService;
 import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
 import jakarta.servlet.http.HttpServletRequest;
@@ -45,6 +46,7 @@ public class AuthServiceImpl implements AuthService{
     PasswordEncoder passwordEncoder;
     RefreshTokenRepository refreshTokenRepository;
     GoogleOutboundClient googleOutboundClient;
+    OnlineStatusService onlineStatusService;
 
     @NonFinal
     @Value("${spring.security.oauth2.client.registration.google.client-id}")
@@ -86,6 +88,7 @@ public class AuthServiceImpl implements AuthService{
         userAuthProviderRepository.save(authProvider);
 
         tokenService.createRefreshToken(user, response);
+        onlineStatusService.setOnline(user.getId());
 
         return buildAuthResponse(user);
     }
@@ -110,6 +113,7 @@ public class AuthServiceImpl implements AuthService{
 
         //var accessToken = jwtUtil.generateAccessToken(user.getId(),user.getEmail());
         tokenService.createRefreshToken(user, response);
+        onlineStatusService.setOnline(user.getId());
 
         return buildAuthResponse(user);
     }
@@ -128,6 +132,13 @@ public class AuthServiceImpl implements AuthService{
 
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response) {
+        // Lấy userId trước khi xóa token để setOffline
+        try {
+            RefreshToken refreshToken = tokenService.validateRefreshToken(request);
+            onlineStatusService.setOffline(refreshToken.getUser().getId());
+        } catch (Exception ignored) {
+            // Token không hợp lệ hoặc đã hết hạn → bỏ qua, vẫn tiến hành logout
+        }
         tokenService.deleteRefreshToken(request, response);
     }
 
@@ -178,6 +189,7 @@ public class AuthServiceImpl implements AuthService{
                 });
 
         tokenService.createRefreshToken(user, response);
+        onlineStatusService.setOnline(user.getId());
 
         return buildAuthResponse(user);
     }

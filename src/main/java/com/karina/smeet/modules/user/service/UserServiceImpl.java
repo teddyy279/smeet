@@ -138,6 +138,12 @@ public class UserServiceImpl implements UserService{
         recentSearchService.saveUser(currentUserId, selected);
     }
 
+    @Override
+    public void heartbeat(UUID userId) {
+        // Gia hạn TTL → user vẫn online
+        onlineStatusService.setOnline(userId);
+    }
+
     private User findUserById(UUID userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() ->  new AppException(ErrorCode.USER_NOT_EXISTED));

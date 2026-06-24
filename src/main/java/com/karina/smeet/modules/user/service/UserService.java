@@ -24,5 +24,7 @@ public interface UserService {
     UserProfileResponse findByUsername(String username, UUID currentUserId);
 
     void selectSearchResult(UUID currentUserId, UUID selectedUserId);
+
+    void heartbeat(UUID userId);
     //UserProfileResponse
 }

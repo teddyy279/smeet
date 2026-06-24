@@ -87,6 +87,7 @@ public class UserController {
 
     @PostMapping("/me/heartbeat")
     public ApiResponse<Void> heartbeat(@AuthenticationPrincipal UUID userId) {
+        userService.heartbeat(userId);
         return ApiResponse.<Void>builder().build();
     }
 }
