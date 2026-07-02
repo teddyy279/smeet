@@ -33,6 +33,7 @@ import java.util.List;
 
 public class SecurityConfig {
     JwtAuthFilter jwtAuthFilter;
+    RateLimitFilter rateLimitFilter;
     ObjectMapper objectMapper = new ObjectMapper();
 
     static String[] PUBLIC_ENDPOINTS = {
@@ -80,7 +81,8 @@ public class SecurityConfig {
                             );
                         })
                 )
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(rateLimitFilter, JwtAuthFilter.class);
         return http.build();
     }
 

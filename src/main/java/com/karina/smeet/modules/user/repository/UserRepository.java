@@ -1,6 +1,7 @@
 package com.karina.smeet.modules.user.repository;
 
 import com.karina.smeet.entity.postgre.User;
+import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,22 +22,23 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     boolean existsByUsername(String username);
 
-    @Query("""
-            SELECT u FROM User u WHERE u.id IN (
-                SELECT f.addressee.id FROM Friendship f
-                WHERE f.requester.id = :currentUserId AND f.status = 'ACCEPTED'
+    @Query(nativeQuery = true, value = """
+            SELECT u.* FROM users u WHERE u.id IN (
+                SELECT f.addressee_id FROM friendships f
+                WHERE f.requester_id = :currentUserId AND f.status = 'ACCEPTED'
                 UNION
-                SELECT f.requester.id FROM Friendship f
-                WHERE f.addressee.id = :currentUserId AND f.status = 'ACCEPTED'            
+                SELECT f.requester_id FROM friendships f
+                WHERE f.addressee_id = :currentUserId AND f.status = 'ACCEPTED'
             )
             AND (
-                LOWER(u.username) LIKE LOWER(CONCAT('%', :query, '%')) 
-                OR LOWER(u.displayName) LIKE LOWER(CONCAT('%', :query, '%'))           
-            )    
+                unaccent(LOWER(u.username)) LIKE unaccent(LOWER(CONCAT('%', :query, '%')))
+                OR unaccent(LOWER(u.display_name)) LIKE unaccent(LOWER(CONCAT('%', :query, '%')))
+            )
             """)
     List<User> searchFriends(
             @Param("query") String query,
-            @Param("currentUserId") UUID currentUserId
+            @Param("currentUserId") UUID currentUserId,
+            Limit limit
     );/* search friend -> khi là bạn bè -> (ACCEPTED) -> với 1 user xét cả trường hợp mình là người request và nguời
      được request kết bạn*/
 
@@ -48,5 +50,19 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByUsernameExact(
             @Param("username") String username,
             @Param("currentUserId") UUID currentUserId
+    );
+
+    @Query(nativeQuery = true, value = """
+            SELECT * FROM users u
+            WHERE u.id != :currentUserId
+            AND (
+                unaccent(LOWER(u.username)) LIKE unaccent(LOWER(CONCAT('%', :query, '%')))
+                OR unaccent(LOWER(u.display_name)) LIKE unaccent(LOWER(CONCAT('%', :query, '%')))
+            )
+            """)
+    List<User> searchGlobal(
+            @Param("query") String query,
+            @Param("currentUserId") UUID currentUserId,
+            Limit limit
     );
 }

@@ -21,6 +21,8 @@ public interface UserService {
 
     SearchResponse search(String query, UUID currentUserId);
 
+    SearchResponse searchGlobal(String query, UUID currentUserId);
+
     UserProfileResponse findByUsername(String username, UUID currentUserId);
 
     void selectSearchResult(UUID currentUserId, UUID selectedUserId);

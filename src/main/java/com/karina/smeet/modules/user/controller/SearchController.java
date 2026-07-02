@@ -31,6 +31,15 @@ public class SearchController {
                 .build();
     }
 
+    @GetMapping("/global")
+    public ApiResponse<SearchResponse> searchGlobal(
+            @RequestParam String q,
+            @AuthenticationPrincipal UUID currentUserId) {
+        return ApiResponse.<SearchResponse>builder()
+                .result(userService.searchGlobal(q, currentUserId))
+                .build();
+    }
+
     @GetMapping("/recent")
     public ApiResponse<List<RecentSearchService.RecentSearchItem>> getRecent(
             @AuthenticationPrincipal UUID currentUserId) {

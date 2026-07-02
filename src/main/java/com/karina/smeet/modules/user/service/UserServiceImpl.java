@@ -17,6 +17,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Limit;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,6 +35,9 @@ import java.util.UUID;
 
 
 public class UserServiceImpl implements UserService{
+    private static final int MIN_QUERY_LENGTH = 2;
+    private static final Limit SEARCH_RESULT_LIMIT = Limit.of(20);
+
     AvatarService avatarService;
     UserRepository userRepository;
     PasswordEncoder passwordEncoder;
@@ -93,16 +97,45 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public SearchResponse search(String query, UUID currentUserId) {
-        if (query == null || query.trim().length() < 2) {
-            return SearchResponse.builder()
-                    .friends(List.of())
-                    .rooms(List.of())
-                    .build();
+        if (isTooShort(query)) {
+            return emptySearchResponse();
         }
         List<User> friends = userRepository.searchFriends(
-                query.trim(), currentUserId);
+                query.trim(), currentUserId, SEARCH_RESULT_LIMIT);
 
-        List<SearchResponse.FriendItem> friendItems = friends.stream()
+        return SearchResponse.builder()
+                .friends(toFriendItems(friends))
+                .rooms(List.of())
+                .build();
+    }
+
+    @Override
+    public SearchResponse searchGlobal(String query, UUID currentUserId) {
+        if (isTooShort(query)) {
+            return emptySearchResponse();
+        }
+        List<User> users = userRepository.searchGlobal(
+                query.trim(), currentUserId, SEARCH_RESULT_LIMIT);
+
+        return SearchResponse.builder()
+                .friends(toFriendItems(users))
+                .rooms(List.of())
+                .build();
+    }
+
+    private boolean isTooShort(String query) {
+        return query == null || query.trim().length() < MIN_QUERY_LENGTH;
+    }
+
+    private SearchResponse emptySearchResponse() {
+        return SearchResponse.builder()
+                .friends(List.of())
+                .rooms(List.of())
+                .build();
+    }
+
+    private List<SearchResponse.FriendItem> toFriendItems(List<User> users) {
+        return users.stream()
                 .map(u -> SearchResponse.FriendItem.builder()
                         .userId(u.getId())
                         .username(u.getUsername())
@@ -112,13 +145,6 @@ public class UserServiceImpl implements UserService{
                         //.directRoomId
                         .build())
                 .toList();
-        // rooms
-        //recentSearchService.saveUser(currentUserId,);
-
-        return SearchResponse.builder()
-                .friends(friendItems)
-                .rooms(List.of())
-                .build();
     }
 
     @Override
