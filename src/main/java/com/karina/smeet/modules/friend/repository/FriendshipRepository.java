@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -21,4 +22,19 @@ public interface FriendshipRepository extends JpaRepository<Friendship, UUID> {
             @Param("userA") UUID userA,
             @Param("userB") UUID userB
     );
+    @Query("""
+          SELECT f FROM Friendship f
+          WHERE f.addressee.id = :userId
+          AND f.status = 'PENDING'
+          ORDER BY f.createdAt DESC 
+          """)
+    List<Friendship> findPendingReceived(@Param("userId") UUID userId);
+
+    @Query("""
+           SELECT f FROM Friendship f
+           WHERE f.requester.id = :userId
+           AND f.status = 'PENDING'
+           ORDER BY f.createdAt DESC
+           """)
+    List<Friendship> findPendingSent(@Param("userId") UUID userId);
 }

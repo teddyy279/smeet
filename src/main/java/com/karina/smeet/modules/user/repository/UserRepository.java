@@ -30,9 +30,15 @@ public interface UserRepository extends JpaRepository<User, UUID> {
                 WHERE f.addressee.id = :currentUserId AND f.status = 'ACCEPTED'            
             )
             AND (
+<<<<<<< HEAD
                 LOWER(u.username) LIKE LOWER(CONCAT('%', :query, '%')) 
                 OR LOWER(u.displayName) LIKE LOWER(CONCAT('%', :query, '%'))           
             )    
+=======
+                immutable_unaccent(LOWER(u.username)) LIKE immutable_unaccent(LOWER(CONCAT('%', :query, '%')))
+                OR immutable_unaccent(LOWER(u.display_name)) LIKE immutable_unaccent(LOWER(CONCAT('%', :query, '%')))
+            )
+>>>>>>> 5c1e8fe (feat(friend): implement friend module with friendship management and room creation)
             """)
     List<User> searchFriends(
             @Param("query") String query,
@@ -49,4 +55,33 @@ public interface UserRepository extends JpaRepository<User, UUID> {
             @Param("username") String username,
             @Param("currentUserId") UUID currentUserId
     );
+<<<<<<< HEAD
+=======
+
+    @Query(nativeQuery = true, value = """
+            SELECT * FROM users u
+            WHERE u.id != :currentUserId
+            AND (
+                immutable_unaccent(LOWER(u.username)) LIKE immutable_unaccent(LOWER(CONCAT('%', :query, '%')))
+                OR immutable_unaccent(LOWER(u.display_name)) LIKE immutable_unaccent(LOWER(CONCAT('%', :query, '%')))
+            )
+            """)
+    List<User> searchGlobal(
+            @Param("query") String query,
+            @Param("currentUserId") UUID currentUserId,
+            Limit limit
+    );
+
+    @Query("""
+           SELECT u FROM User u WHERE u.id IN(
+               SELECT f.addressee.id FROM Friendship f
+               WHERE f.requester.id = :userId AND f.status = 'ACCEPTED'
+               UNION
+               SELECT f.requester.id FROM Friendship f
+               WHERE f.addressee.id = :userId AND f.status = 'ACCEPTED'
+               )
+               ORDER BY u.displayName ASC
+           """)
+    List<User> findAllFriends(@Param("userId") UUID userId);
+>>>>>>> 5c1e8fe (feat(friend): implement friend module with friendship management and room creation)
 }
