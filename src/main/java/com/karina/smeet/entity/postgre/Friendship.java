@@ -12,10 +12,16 @@ import java.util.UUID;
 @Entity
 @Table(
         name = "friendships",
-        uniqueConstraints = @UniqueConstraint(
-                name = "uq_friendship",
-                columnNames = {"requester_id", "addressee_id"}
-        ),
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uq_friendship",
+                        columnNames = {"requester_id", "addressee_id"}
+                ),
+                @UniqueConstraint(
+                        name = "uq_friendship_pair",
+                        columnNames = {"user_low_id", "user_high_id"}
+                )
+        },
         indexes = {
                 @Index(name = "idx_friendship_requester", columnList = "requester_id"),
                 @Index(name = "idx_friendship_addressee", columnList = "addressee_id")
@@ -46,6 +52,15 @@ public class Friendship {
     @Column(nullable = false, length = 20)
     Status status;
 
+    @Column(name = "user_low_id", nullable = false, updatable = false)
+    UUID userLowId;
+
+    @Column(name = "user_high_id", nullable = false, updatable = false)
+    UUID userHighId;
+
+    @Version
+    @Column(nullable = false)
+    Long version;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -54,4 +69,17 @@ public class Friendship {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private Instant updatedAt;
+
+    @PrePersist
+    private void normalizePair() {
+        UUID a = requester.getId();
+        UUID b = addressee.getId();
+        if (a.compareTo(b) <= 0) {
+            userLowId = a;
+            userHighId = b;
+        } else {
+            userLowId = b;
+            userHighId = a;
+        }
+    }
 }

@@ -50,6 +50,7 @@ public enum ErrorCode {
     ALREADY_FRIENDS             (1062, "You are already friends with this user",            HttpStatus.CONFLICT),
     FRIENDSHIP_NOT_FOUND        (1063, "Friend relationship not found",                     HttpStatus.NOT_FOUND),
     INVALID_FRIENDSHIP_STATUS   (1064, "Friend request is no longer pending",               HttpStatus.BAD_REQUEST),
+    FRIENDSHIP_CONFLICT         (1065, "A relationship with this user already exists",      HttpStatus.CONFLICT),
 
     // ── Room ──────────────────────────────────────────────────
     ROOM_NOT_FOUND              (1070, "Room not found",                                    HttpStatus.NOT_FOUND),

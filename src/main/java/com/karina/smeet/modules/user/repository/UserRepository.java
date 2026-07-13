@@ -1,6 +1,7 @@
 package com.karina.smeet.modules.user.repository;
 
 import com.karina.smeet.entity.postgre.User;
+import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -30,15 +31,9 @@ public interface UserRepository extends JpaRepository<User, UUID> {
                 WHERE f.addressee.id = :currentUserId AND f.status = 'ACCEPTED'            
             )
             AND (
-<<<<<<< HEAD
-                LOWER(u.username) LIKE LOWER(CONCAT('%', :query, '%')) 
-                OR LOWER(u.displayName) LIKE LOWER(CONCAT('%', :query, '%'))           
-            )    
-=======
                 immutable_unaccent(LOWER(u.username)) LIKE immutable_unaccent(LOWER(CONCAT('%', :query, '%')))
                 OR immutable_unaccent(LOWER(u.display_name)) LIKE immutable_unaccent(LOWER(CONCAT('%', :query, '%')))
             )
->>>>>>> 5c1e8fe (feat(friend): implement friend module with friendship management and room creation)
             """)
     List<User> searchFriends(
             @Param("query") String query,
@@ -55,8 +50,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
             @Param("username") String username,
             @Param("currentUserId") UUID currentUserId
     );
-<<<<<<< HEAD
-=======
 
     @Query(nativeQuery = true, value = """
             SELECT * FROM users u
@@ -83,5 +76,4 @@ public interface UserRepository extends JpaRepository<User, UUID> {
                ORDER BY u.displayName ASC
            """)
     List<User> findAllFriends(@Param("userId") UUID userId);
->>>>>>> 5c1e8fe (feat(friend): implement friend module with friendship management and room creation)
 }

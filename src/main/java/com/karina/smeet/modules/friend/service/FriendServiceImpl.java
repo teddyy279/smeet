@@ -14,6 +14,8 @@ import com.karina.smeet.modules.user.service.OnlineStatusService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +38,7 @@ public class FriendServiceImpl implements  FriendService{
     @Transactional
     public void sendFriendRequest(UUID currentUserId, UUID targetUserId) {
         if (currentUserId.equals(targetUserId))
-            throw new AppException(() -> ErrorCode.CANNOT_ADD_SELF);
+            throw new AppException(ErrorCode.CANNOT_ADD_SELF);
 
 
         User requester = findUserById(currentUserId);
@@ -50,18 +52,21 @@ public class FriendServiceImpl implements  FriendService{
                     throw new AppException(switch (f.getStatus()){
                         case PENDING -> ErrorCode.FRIEND_REQUEST_ALREADY_SENT;
                         case ACCEPTED -> ErrorCode.ALREADY_FRIENDS;
-                        case REJECTED -> ErrorCode.FRIEND_REQUEST_ALREADY_SEND;
+                        case REJECTED -> ErrorCode.FRIEND_REQUEST_ALREADY_SENT;
                     });
                 });
 
         Friendship friendship = Friendship.builder()
                 .requester(requester)
                 .addressee(addressee)
-                .status(Friendship.Status.ACCEPTED)
+                .status(Friendship.Status.PENDING)
                 .build();
 
-        friendshipRepository.save(friendship);
-
+        try {
+            friendshipRepository.saveAndFlush(friendship);
+        } catch (DataIntegrityViolationException e) {
+            throw new AppException(ErrorCode.FRIENDSHIP_CONFLICT);
+        }
 
         //notify to addressee
         notificationFacade.friendRequestSent(targetUserId, requester);
@@ -80,12 +85,15 @@ public class FriendServiceImpl implements  FriendService{
             throw new AppException(ErrorCode.INVALID_FRIENDSHIP_STATUS);
 
         friendship.setStatus(Friendship.Status.ACCEPTED);
-        friendshipRepository.save(friendship);
+        try {
+            friendshipRepository.saveAndFlush(friendship);
+        } catch (ObjectOptimisticLockingFailureException e) {
+            throw new AppException(ErrorCode.INVALID_FRIENDSHIP_STATUS);
+        }
 
-        Room directRoom = createDirectRoom(
-                friendship.getRequester(),
-                friendship.getAddressee()
-        );
+        Room directRoom = roomRepository
+                .findDirectRoom(friendship.getRequester().getId(), friendship.getAddressee().getId())
+                .orElseGet(() -> createDirectRoom(friendship.getRequester(), friendship.getAddressee()));
 
         notificationFacade.friendRequestAccepted(
                 friendship.getRequester().getId(),
@@ -106,7 +114,11 @@ public class FriendServiceImpl implements  FriendService{
             throw new AppException(ErrorCode.INVALID_FRIENDSHIP_STATUS);
 
         friendship.setStatus(Friendship.Status.REJECTED);
-        friendshipRepository.save(friendship);
+        try {
+            friendshipRepository.saveAndFlush(friendship);
+        } catch (ObjectOptimisticLockingFailureException e) {
+            throw new AppException(ErrorCode.INVALID_FRIENDSHIP_STATUS);
+        }
     }
 
     @Override
@@ -173,6 +185,7 @@ public class FriendServiceImpl implements  FriendService{
                 .user(userA)
                 .role(Roommember.Role.MEMBER)
                 .build();
+        roomMemberRepository.save(memberA);
 
         Roommember memberB = Roommember.builder()
                 .id(new RoomMemberId(room.getId(), userB.getId()))
@@ -180,6 +193,8 @@ public class FriendServiceImpl implements  FriendService{
                 .user(userB)
                 .role(Roommember.Role.MEMBER)
                 .build();
+
+        roomMemberRepository.save(memberB);
 
         return room;
     }
