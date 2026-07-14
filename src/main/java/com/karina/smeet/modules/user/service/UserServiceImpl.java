@@ -2,10 +2,13 @@ package com.karina.smeet.modules.user.service;
 
 import com.karina.smeet.common.exception.AppException;
 import com.karina.smeet.common.exception.ErrorCode;
+import com.karina.smeet.entity.postgre.Room;
 import com.karina.smeet.entity.postgre.User;
 import com.karina.smeet.entity.postgre.UserAuthProvider;
 import com.karina.smeet.enums.Provider;
 import com.karina.smeet.modules.auth.repository.UserAuthProviderRepository;
+import com.karina.smeet.modules.room.repository.RoomMemberRepository;
+import com.karina.smeet.modules.room.repository.RoomRepository;
 import com.karina.smeet.modules.user.dto.request.ChangePasswordRequest;
 import com.karina.smeet.modules.user.dto.request.UpdateProfileRequest;
 import com.karina.smeet.modules.user.dto.response.MyProfileResponse;
@@ -41,6 +44,8 @@ public class UserServiceImpl implements UserService{
     UserAuthProviderRepository userAuthProviderRepository;
     OnlineStatusService onlineStatusService;
     RecentSearchService recentSearchService;
+    RoomRepository roomRepository;
+    RoomMemberRepository roomMemberRepository;
 
     @Override
     public MyProfileResponse getMyProfile(UUID userId) {
@@ -112,12 +117,20 @@ public class UserServiceImpl implements UserService{
                         //.directRoomId
                         .build())
                 .toList();
-        // rooms
-        //recentSearchService.saveUser(currentUserId,);
+        List<Room> rooms = roomRepository.searchGroupRooms(query.trim(), currentUserId);
+
+        List<SearchResponse.RoomItem> roomItems = rooms.stream()
+                .map(r -> SearchResponse.RoomItem.builder()
+                        .roomId(r.getId())
+                        .name(r.getName())
+                        .avatarUrl(r.getAvatarUrl())
+                        .memberCount((int) roomMemberRepository.countByRoom_Id(r.getId()))
+                        .build())
+                .toList();
 
         return SearchResponse.builder()
                 .friends(friendItems)
-                .rooms(List.of())
+                .rooms(roomItems)
                 .build();
     }
 

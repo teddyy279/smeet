@@ -21,3 +21,6 @@ CREATE INDEX IF NOT EXISTS idx_users_username_trgm
 
 CREATE INDEX IF NOT EXISTS idx_users_display_name_trgm
     ON users USING GIN (immutable_unaccent(lower(display_name)) gin_trgm_ops);
+
+CREATE INDEX IF NOT EXISTS idx_rooms_name_trgm
+    ON rooms USING GIN (immutable_unaccent(lower(name)) gin_trgm_ops);

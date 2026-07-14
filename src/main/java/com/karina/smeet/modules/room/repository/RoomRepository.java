@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -20,5 +21,17 @@ public interface RoomRepository extends JpaRepository<Room, UUID> {
     Optional<Room> findDirectRoom(
             @Param("userA") UUID userA,
             @Param("userB") UUID userB
+    );
+
+    @Query("""
+           SELECT r FROM Room r
+           JOIN r.members m
+           WHERE m.user.id = :userId
+           AND r.type = 'GROUP'
+           AND immutable_unaccent(LOWER(r.name)) LIKE immutable_unaccent(LOWER(CONCAT('%', :query, '%')))
+           """)
+    List<Room> searchGroupRooms(
+            @Param("query") String query,
+            @Param("userId") UUID userId
     );
 }
