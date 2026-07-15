@@ -46,4 +46,8 @@ public class Roommember {
 
     @Column(name = "last_read_at")
     private Instant lastReadAt;
+
+    @Version
+    @Column(nullable = false)
+    private Long version;
 }

@@ -34,4 +34,13 @@ public interface RoomRepository extends JpaRepository<Room, UUID> {
             @Param("query") String query,
             @Param("userId") UUID userId
     );
+
+    @Query("""
+            SELECT r FROM Room r
+            JOIN r.members m
+            WHERE m.user.id = :userId
+            AND r.type = 'GROUP'
+            ORDER BY r.createdAt DESC
+            """)
+    List<Room> findAllGroupsByUserId(@Param("userId") UUID userId);
 }

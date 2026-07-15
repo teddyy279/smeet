@@ -53,9 +53,17 @@ public enum ErrorCode {
     FRIENDSHIP_CONFLICT         (1065, "A relationship with this user already exists",      HttpStatus.CONFLICT),
 
     // ── Room ──────────────────────────────────────────────────
-    ROOM_NOT_FOUND              (1070, "Room not found",                                    HttpStatus.NOT_FOUND),
-    NOT_ROOM_MEMBER             (1071, "You are not a member of this room",                 HttpStatus.FORBIDDEN),
-    PERMISSION_DENIED           (1072, "You do not have permission to perform this action", HttpStatus.FORBIDDEN),
+    ROOM_NOT_FOUND               (1070, "Room not found",                                        HttpStatus.NOT_FOUND),
+    NOT_ROOM_MEMBER              (1071, "You are not a member of this room",                     HttpStatus.FORBIDDEN),
+    PERMISSION_DENIED            (1072, "You do not have permission to perform this action",     HttpStatus.FORBIDDEN),
+    CANNOT_MODIFY_DIRECT_ROOM    (1080, "This action is not allowed on a direct message room",   HttpStatus.BAD_REQUEST),
+    ALREADY_ROOM_MEMBER          (1081, "User is already a member of this room",                 HttpStatus.CONFLICT),
+    CANNOT_KICK_SELF             (1082, "You cannot kick yourself, use leave instead",            HttpStatus.BAD_REQUEST),
+    CANNOT_KICK_OWNER            (1083, "You cannot remove the room owner",                       HttpStatus.FORBIDDEN),
+    CANNOT_CHANGE_OWN_ROLE       (1084, "You cannot change your own role",                        HttpStatus.BAD_REQUEST),
+    NOT_FRIENDS                  (1085, "You can only message users who are your friends",        HttpStatus.FORBIDDEN),
+    OWNER_CANNOT_LEAVE           (1086, "Transfer ownership to another member before leaving the room", HttpStatus.BAD_REQUEST),
+    ROOM_MEMBER_CONFLICT         (1087, "This member was just modified by someone else, please retry", HttpStatus.CONFLICT),
     ;
 
     private final int code;
