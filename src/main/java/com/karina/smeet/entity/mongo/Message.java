@@ -15,8 +15,8 @@ import java.util.List;
 
 @Document(collection = "messages")
 @CompoundIndexes({
-        @CompoundIndex(name = "idx_room_time",   def = "{'roomId': 1, 'createdAt': -1}"),
-        @CompoundIndex(name = "idx_room_active", def = "{'roomId': 1, 'deletedAt': 1, 'createdAt': -1}")
+        @CompoundIndex(name = "idx_room_time",   def = "{'roomId': 1, 'createdAt': -1}"), //query get message by room
+        @CompoundIndex(name = "idx_room_active", def = "{'roomId': 1, 'deletedAt': 1, 'createdAt': -1}") //query get message
 })
 @Data
 @Builder
@@ -27,7 +27,7 @@ import java.util.List;
 
 public class Message {
 
-    public enum Type { TEXT, IMAGE, FILE, CALL }
+    public enum Type { TEXT, IMAGE, FILE, CALL, AUDIO }
 
     @Id
     String id;
@@ -45,6 +45,8 @@ public class Message {
 
     @Builder.Default
     List<String> mediaUrls = new ArrayList<>();
+
+    Integer durationSeconds;
 
     String replyTo;
 

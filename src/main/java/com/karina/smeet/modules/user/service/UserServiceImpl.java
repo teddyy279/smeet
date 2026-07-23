@@ -37,7 +37,7 @@ import java.util.UUID;
 
 
 public class UserServiceImpl implements UserService{
-    AvatarService avatarService;
+    //AvatarService avatarService;
     UserRepository userRepository;
     PasswordEncoder passwordEncoder;
     UserMapper userMapper;

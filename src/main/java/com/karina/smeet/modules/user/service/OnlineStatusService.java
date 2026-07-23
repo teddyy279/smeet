@@ -19,7 +19,7 @@ import java.util.UUID;
 public class OnlineStatusService {
     private final RedisTemplate redisTemplate;
     private static final String KEY = "user:online:%s";
-    private static final long TTL_SEC = 30;
+    private static final long TTL_SEC = 45;
 
     public boolean isOnline(UUID userId) {
         return Boolean.TRUE.equals(

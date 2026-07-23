@@ -64,6 +64,15 @@ public enum ErrorCode {
     NOT_FRIENDS                  (1085, "You can only message users who are your friends",        HttpStatus.FORBIDDEN),
     OWNER_CANNOT_LEAVE           (1086, "Transfer ownership to another member before leaving the room", HttpStatus.BAD_REQUEST),
     ROOM_MEMBER_CONFLICT         (1087, "This member was just modified by someone else, please retry", HttpStatus.CONFLICT),
+
+    // ── Chat ──────────────────────────────────────────────────
+    ROOM_ID_BLANK                (1090, "Room id cannot be empty",                              HttpStatus.BAD_REQUEST),
+    MESSAGE_TYPE_NULL            (1091, "Message type cannot be null",                          HttpStatus.BAD_REQUEST),
+    MESSAGE_CONTENT_REQUIRED     (1092, "Message content is required for text messages",        HttpStatus.BAD_REQUEST),
+    MEDIA_URL_REQUIRED           (1093, "Media URL is required for this message type",          HttpStatus.BAD_REQUEST),
+    AUDIO_DURATION_REQUIRED      (1094, "Audio duration must be a positive number",             HttpStatus.BAD_REQUEST),
+    MESSAGE_NOT_FOUND            (1095, "Message not found",                                    HttpStatus.NOT_FOUND),
+    CANNOT_DELETE_MESSAGE        (1096, "You can only delete your own messages",                HttpStatus.FORBIDDEN),
     ;
 
     private final int code;
