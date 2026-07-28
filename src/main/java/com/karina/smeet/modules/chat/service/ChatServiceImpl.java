@@ -75,10 +75,20 @@ public class ChatServiceImpl implements ChatService{
             UUID memberId = member.getUser().getId();
             if (memberId.equals(senderId)) continue;
             if (!activeRoomService.isViewingRoom(memberId, roomId)) {
-                notificationFacade.missedMessage(memberId, roomId, sender.getDisplayName());
+                notificationFacade.missedMessage(memberId, roomId, sender.getDisplayName(), previewOf(saved));
             }
         }
         return response;
+    }
+
+    private String previewOf(Message message) {
+        return switch (message.getType()) {
+            case TEXT -> message.getContent();
+            case IMAGE -> "[Hình ảnh]";
+            case FILE -> "[Tệp đính kèm]";
+            case AUDIO -> "[Tin nhắn thoại]";
+            case CALL -> "[Cuộc gọi]";
+        };
     }
 
     @Override
