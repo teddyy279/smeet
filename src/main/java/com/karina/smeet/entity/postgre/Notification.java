@@ -14,18 +14,18 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-
 @Table(name = "notifications")
-
 public class Notification {
+
     public enum Type {
         FRIEND_REQUEST,
         FRIEND_ACCEPTED,
         ROOM_INVITE,
-        MISSED_CALL
+        MISSED_CALL,
+        MISSED_MESSAGE
     }
 
-    public enum ReferenceType { ROOM, FRIEND, CALL}
+    public enum ReferenceType { ROOM, FRIEND, CALL }
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -45,6 +45,12 @@ public class Notification {
     @Enumerated(EnumType.STRING)
     @Column(name = "reference_type", length = 10)
     ReferenceType referenceType;
+
+    @Column(name = "title")
+    String title;
+
+    @Column(name = "body")
+    String body;
 
     @Column(name = "is_read", nullable = false)
     @Builder.Default

@@ -64,12 +64,6 @@ spring:
     listener:
       simple:
         acknowledge-mode: auto
-        retry:
-          enabled: true
-          max-attempts: 3
-          initial-interval: 3000ms
-          multiplier: 2.0
-          max-interval: 10000ms
 
   security:
     oauth2:
