@@ -21,6 +21,12 @@ public interface RoomMemberRepository extends JpaRepository<Roommember, UUID> {
     // Used to resolve "my role" for a whole page of rooms in a single query.
     List<Roommember> findByRoom_IdInAndUser_Id(List<UUID> roomIds, UUID userId);
 
+    List<Roommember> findByUser_Id(UUID userId);
+
+    // Used to resolve the "other member" of every DIRECT room in a page in one query,
+    // instead of one findByRoom_Id call per DIRECT room.
+    List<Roommember> findByRoom_IdIn(List<UUID> roomIds);
+
     // Used to resolve member counts for a whole page of rooms in a single query;
     // row[0] is the room id (UUID), row[1] is the count (Long).
     @Query("""

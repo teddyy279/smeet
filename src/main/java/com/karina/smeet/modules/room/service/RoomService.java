@@ -12,7 +12,8 @@ import java.util.UUID;
 public interface RoomService {
     RoomResponse createRoom(UUID currentUserId, CreateRoomRequest request);
 
-    List<RoomResponse> getMyGroupRooms(UUID currentUserId);
+    // filter: "all" (DIRECT+GROUP, sorted by last message), "group" (GROUP only), "unread"
+    List<RoomResponse> getMyRooms(UUID currentUserId, String filter);
 
     RoomDetailResponse getRoomDetail(UUID roomId, UUID currentUserId);
 

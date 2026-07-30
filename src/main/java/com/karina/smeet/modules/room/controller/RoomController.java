@@ -36,11 +36,13 @@ public class RoomController {
                 .build();
     }
 
+    // filter: "all" (default, DIRECT+GROUP sorted by last message), "group", "unread"
     @GetMapping
-    public ApiResponse<List<RoomResponse>> getMyGroupRooms(
+    public ApiResponse<List<RoomResponse>> getMyRooms(
+            @RequestParam(defaultValue = "all") String filter,
             @AuthenticationPrincipal UUID currentUserId) {
         return ApiResponse.<List<RoomResponse>>builder()
-                .result(roomService.getMyGroupRooms(currentUserId))
+                .result(roomService.getMyRooms(currentUserId, filter))
                 .build();
     }
 

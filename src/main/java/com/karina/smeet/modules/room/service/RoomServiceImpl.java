@@ -7,6 +7,7 @@ import com.karina.smeet.entity.postgre.RoomMemberId;
 import com.karina.smeet.entity.postgre.Roommember;
 import com.karina.smeet.entity.postgre.User;
 import com.karina.smeet.modules.friend.repository.FriendshipRepository;
+import com.karina.smeet.modules.notification.facade.NotificationFacade;
 import com.karina.smeet.modules.room.dto.request.CreateRoomRequest;
 import com.karina.smeet.modules.room.dto.request.UpdateRoomRequest;
 import com.karina.smeet.modules.room.dto.response.RoomDetailResponse;
@@ -25,6 +26,7 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,6 +43,7 @@ public class RoomServiceImpl implements RoomService {
     OnlineStatusService onlineStatusService;
     FriendshipRepository friendshipRepository;
     RoomMapper roomMapper;
+    NotificationFacade notificationFacade;
 
     @Override
     @Transactional
@@ -67,9 +70,20 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public List<RoomResponse> getMyGroupRooms(UUID currentUserId) {
-        return roomMapper.toRoomResponses(
-                roomRepository.findAllGroupsByUserId(currentUserId), currentUserId);
+    public List<RoomResponse> getMyRooms(UUID currentUserId, String filter) {
+        List<RoomResponse> all = roomMapper.toRoomResponses(
+                roomRepository.findAllRoomsByUserId(currentUserId), currentUserId);
+
+        List<RoomResponse> sorted = all.stream()
+                .sorted(Comparator.comparing(RoomResponse::lastMessageAt,
+                        Comparator.nullsLast(Comparator.reverseOrder())))
+                .toList();
+
+        return switch (filter) {
+            case "group" -> sorted.stream().filter(r -> r.type() == Room.Type.GROUP).toList();
+            case "unread" -> sorted.stream().filter(r -> r.unreadCount() > 0).toList();
+            default -> sorted;
+        };
     }
 
     @Override
@@ -98,6 +112,8 @@ public class RoomServiceImpl implements RoomService {
 
         User target = findUser(targetUserId);
         addMemberInterval(room, target, Role.MEMBER);
+
+        notificationFacade.roomInvited(targetUserId, roomId, room.getName());
     }
 
     @Override

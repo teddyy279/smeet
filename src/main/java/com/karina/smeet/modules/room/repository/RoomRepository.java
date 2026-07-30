@@ -35,12 +35,12 @@ public interface RoomRepository extends JpaRepository<Room, UUID> {
             @Param("userId") UUID userId
     );
 
+    // Returns every room (DIRECT + GROUP) the user belongs to. Sorting by last-message time
+    // happens in RoomServiceImpl afterwards since that data lives in MongoDB, not Postgres.
     @Query("""
             SELECT r FROM Room r
             JOIN r.members m
             WHERE m.user.id = :userId
-            AND r.type = 'GROUP'
-            ORDER BY r.createdAt DESC
             """)
-    List<Room> findAllGroupsByUserId(@Param("userId") UUID userId);
+    List<Room> findAllRoomsByUserId(@Param("userId") UUID userId);
 }

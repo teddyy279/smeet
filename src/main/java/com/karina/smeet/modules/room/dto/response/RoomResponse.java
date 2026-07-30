@@ -15,8 +15,14 @@ public record RoomResponse(
         Room.Type type,
         String name,
         String avatarUrl,
+
         int memberCount,
         Instant createdAt,
 
-        Roommember.Role myRole
+        Roommember.Role myRole,
+
+        String lastMessagePreview,
+        Instant lastMessageAt,
+
+        long unreadCount
 ) {}
