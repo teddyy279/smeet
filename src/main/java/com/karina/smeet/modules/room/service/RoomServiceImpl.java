@@ -146,8 +146,6 @@ public class RoomServiceImpl implements RoomService {
             throw new AppException(ErrorCode.OWNER_CANNOT_LEAVE);
 
         roomMemberRepository.delete(me);
-
-        //long remaining = room
     }
 
     @Override

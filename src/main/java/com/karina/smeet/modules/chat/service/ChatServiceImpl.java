@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -130,7 +131,7 @@ public class ChatServiceImpl implements ChatService{
         Message saved = messageRepository.save(message);
         ChatMessageResponse response = toResponse(saved);
 
-        simpMessagingTemplate.convertAndSend("/topic/room" + message.getRoomId(), response);
+        simpMessagingTemplate.convertAndSend("/topic/room." + message.getRoomId(), response);
 
         return response;
     }
@@ -160,7 +161,7 @@ public class ChatServiceImpl implements ChatService{
         roomMemberRepository.findByRoom_IdAndUser_Id(roomUuid, userId)
                 .orElseThrow(() -> new AppException(ErrorCode.NOT_ROOM_MEMBER));
 
-        Pageable pageable = PageRequest.of(0, size);
+        Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "createdAt", "id"));
 
         List<Message> messages = (before == null || beforeId == null)
                 ? messageRepository.findByRoomIdAndDeletedAtIsNullOrderByCreatedAtDescIdDesc(roomId, pageable)
