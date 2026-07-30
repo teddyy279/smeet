@@ -3,6 +3,7 @@ package com.karina.smeet.modules.chat.service;
 import com.karina.smeet.common.exception.AppException;
 import com.karina.smeet.common.exception.ErrorCode;
 import com.karina.smeet.entity.mongo.Message;
+import com.karina.smeet.entity.postgre.Room;
 import com.karina.smeet.entity.postgre.Roommember;
 import com.karina.smeet.entity.postgre.User;
 import com.karina.smeet.modules.chat.dto.request.SendMessageRequest;
@@ -21,7 +22,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -164,6 +167,27 @@ public class ChatServiceImpl implements ChatService{
                 : messageRepository.findOlderThanCursor(roomId, before, beforeId, pageable);
 
         return messages.stream().map(this::toResponse).toList();
+    }
+
+
+    @Override
+    public Map<UUID, Long> getUnreadCountByRoom(UUID userId) {
+        List<Roommember> myRooms = roomMemberRepository.findByUser_Id(userId);
+
+        Map<UUID, Long> result = new HashMap<>();
+        for (Roommember membership : myRooms) {
+            UUID roomId = membership.getRoom().getId();
+
+            Instant lastRead = membership.getLastReadAt() != null
+                    ? membership.getLastReadAt()
+                    : Instant.EPOCH;
+
+            long unread = messageRepository.countByRoomIdAndCreatedAtAfterAndDeletedAtIsNull(
+                    roomId.toString(), lastRead);
+
+            result.put(roomId, unread);
+        }
+        return result;
     }
 
     private ChatMessageResponse toResponse(Message m) {

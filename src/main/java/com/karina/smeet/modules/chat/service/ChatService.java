@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public interface ChatService {
@@ -23,4 +24,6 @@ public interface ChatService {
     // load lịch sử chat — phân trang
     List<ChatMessageResponse> getHistory(
             String roomId, UUID userId, Instant before, String beforeId, int size);
+
+    Map<UUID, Long> getUnreadCountByRoom(UUID userId);
 }
