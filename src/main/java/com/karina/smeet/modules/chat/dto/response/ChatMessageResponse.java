@@ -20,11 +20,13 @@ public record ChatMessageResponse(
         List<String> mediaUrls,
         Integer durationSeconds,
         String replyTo,
+        String forwardedFrom,
 
         List<ReactionDto> reactions,
         List<SeenByDto> seenBy,
 
-        Instant createdAt
+        Instant createdAt,
+        boolean recalled
 ) {
 
     @Builder

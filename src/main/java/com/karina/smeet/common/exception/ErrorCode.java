@@ -73,6 +73,10 @@ public enum ErrorCode {
     AUDIO_DURATION_REQUIRED      (1094, "Audio duration must be a positive number",             HttpStatus.BAD_REQUEST),
     MESSAGE_NOT_FOUND            (1095, "Message not found",                                    HttpStatus.NOT_FOUND),
     CANNOT_DELETE_MESSAGE        (1096, "You can only delete your own messages",                HttpStatus.FORBIDDEN),
+    CANNOT_FORWARD_RECALLED      (1097, "Cannot forward a recalled message",                    HttpStatus.BAD_REQUEST),
+    MESSAGE_ALREADY_PINNED       (1098, "Message is already pinned",                             HttpStatus.CONFLICT),
+    MESSAGE_NOT_PINNED           (1099, "Message is not pinned",                                 HttpStatus.NOT_FOUND),
+    PIN_LIMIT_EXCEEDED           (1100, "This room already has the maximum number of pinned messages", HttpStatus.BAD_REQUEST),
     ;
 
     private final int code;

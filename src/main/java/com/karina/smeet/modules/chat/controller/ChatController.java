@@ -1,8 +1,10 @@
 package com.karina.smeet.modules.chat.controller;
 
 import com.karina.smeet.common.response.ApiResponse;
+import com.karina.smeet.modules.chat.dto.request.ForwardMessageRequest;
 import com.karina.smeet.modules.chat.dto.response.ChatMessageResponse;
 import com.karina.smeet.modules.chat.service.ChatService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -42,6 +44,62 @@ public class ChatController {
         chatService.deleteMessage(messageId, userId);
         return ApiResponse.<Void>builder()
                 .message("Message recalled!")
+                .build();
+    }
+
+    @DeleteMapping("/messages/{messageId}/hide")
+    public ApiResponse<Void> hideMessageForMe(
+            @PathVariable String messageId,
+            @AuthenticationPrincipal UUID userId) {
+
+        chatService.hideMessageForMe(messageId, userId);
+        return ApiResponse.<Void>builder()
+                .message("Message deleted for you!")
+                .build();
+    }
+
+    @PostMapping("/messages/{messageId}/forward")
+    public ApiResponse<List<ChatMessageResponse>> forwardMessage(
+            @PathVariable String messageId,
+            @Valid @RequestBody ForwardMessageRequest request,
+            @AuthenticationPrincipal UUID userId) {
+
+        return ApiResponse.<List<ChatMessageResponse>>builder()
+                .result(chatService.forwardMessage(messageId, userId, request.targetRoomIds()))
+                .build();
+    }
+
+    @PostMapping("/rooms/{roomId}/pins/{messageId}")
+    public ApiResponse<Void> pinMessage(
+            @PathVariable String roomId,
+            @PathVariable String messageId,
+            @AuthenticationPrincipal UUID userId) {
+
+        chatService.pinMessage(roomId, messageId, userId);
+        return ApiResponse.<Void>builder()
+                .message("Message pinned!")
+                .build();
+    }
+
+    @DeleteMapping("/rooms/{roomId}/pins/{messageId}")
+    public ApiResponse<Void> unpinMessage(
+            @PathVariable String roomId,
+            @PathVariable String messageId,
+            @AuthenticationPrincipal UUID userId) {
+
+        chatService.unpinMessage(roomId, messageId, userId);
+        return ApiResponse.<Void>builder()
+                .message("Message unpinned!")
+                .build();
+    }
+
+    @GetMapping("/rooms/{roomId}/pins")
+    public ApiResponse<List<ChatMessageResponse>> getPinnedMessages(
+            @PathVariable String roomId,
+            @AuthenticationPrincipal UUID userId) {
+
+        return ApiResponse.<List<ChatMessageResponse>>builder()
+                .result(chatService.getPinnedMessages(roomId, userId))
                 .build();
     }
 

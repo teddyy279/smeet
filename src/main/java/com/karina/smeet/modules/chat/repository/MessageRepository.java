@@ -15,14 +15,20 @@ import java.util.Optional;
 public interface MessageRepository extends MongoRepository<Message, String> {
     Optional<Message> findByIdAndDeletedAtIsNull(String messageId);
 
-    List<Message> findByRoomIdAndDeletedAtIsNullOrderByCreatedAtDescIdDesc(String roomId, Pageable pageable);
-
+    // lịch sử chat: hiện cả tin đã thu hồi (tombstone), chỉ ẩn tin mà chính userId đã tự xóa cho mình
+    @Query("""
+           {
+                'roomId': ?0,
+                'deletedFor': { '$nin': [?1] }
+           }
+           """)
+    List<Message> findVisibleHistory(String roomId, String userId, Pageable pageable);
 
     //lt -> less than
     /*
     {
         'roomId': roomId,
-        'deletedAt': null,
+        'deletedFor': { '$nin': [userId] },
         '$or': [
             { 'createdAt': { '$lt': before } },
             { 'createdAt': before, '_id': { '$lt': beforeId } }
@@ -32,15 +38,15 @@ public interface MessageRepository extends MongoRepository<Message, String> {
     @Query("""
            {
                 'roomId': ?0,
-                'deletedAt': null,
+                'deletedFor': { '$nin': [?1] },
                 '$or': [
-                    { 'createdAt': { '$lt': ?1} },   
-                    { 'createdAt': ?1, '_id': { '$lt': ?2}}
-                ]     
+                    { 'createdAt': { '$lt': ?2} },
+                    { 'createdAt': ?2, '_id': { '$lt': ?3}}
+                ]
            }
            """)
     List<Message> findOlderThanCursor(
-            String roomId, Instant beforeCreatedAt, String beforeId, Pageable pageable);
+            String roomId, String userId, Instant beforeCreatedAt, String beforeId, Pageable pageable);
 
     long countByRoomIdAndCreatedAtAfterAndDeletedAtIsNull(String roomId,Instant after);
 

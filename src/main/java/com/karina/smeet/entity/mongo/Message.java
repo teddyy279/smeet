@@ -27,7 +27,7 @@ import java.util.List;
 
 public class Message {
 
-    public enum Type { TEXT, IMAGE, FILE, CALL, AUDIO }
+    public enum Type { TEXT, IMAGE, VIDEO, FILE, CALL, AUDIO }
 
     @Id
     String id;
@@ -50,6 +50,9 @@ public class Message {
 
     String replyTo;
 
+    //id
+    String forwardedFrom;
+
     @Builder.Default
     List<Reaction> reactions = new ArrayList<>();
 
@@ -61,6 +64,9 @@ public class Message {
     Instant createdAt;
 
     Instant deletedAt;
+
+    @Builder.Default
+    List<String> deletedFor = new ArrayList<>();
 
 
     @Data

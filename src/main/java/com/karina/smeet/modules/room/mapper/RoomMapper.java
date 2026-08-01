@@ -223,6 +223,7 @@ public abstract class RoomMapper {
         return switch (message.getType()) {
             case TEXT -> message.getContent();
             case IMAGE -> "[IMAGE]";
+            case VIDEO -> "[VIDEO]";
             case FILE -> "[attachment]";
             case AUDIO -> "[Voice message]";
             case CALL -> "Missed call";

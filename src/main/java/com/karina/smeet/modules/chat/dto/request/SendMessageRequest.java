@@ -28,7 +28,7 @@ public record SendMessageRequest(
                 if (type == Message.Type.TEXT && (content == null || content.isBlank()))
                         throw new AppException(ErrorCode.MESSAGE_CONTENT_REQUIRED);
 
-                if ((type == Message.Type.IMAGE || type == Message.Type.FILE)
+                if ((type == Message.Type.IMAGE || type == Message.Type.VIDEO || type == Message.Type.FILE)
                         && (mediaUrls == null || mediaUrls.isEmpty()))
                         throw new AppException(ErrorCode.MEDIA_URL_REQUIRED);
 
